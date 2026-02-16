@@ -10,6 +10,7 @@ php artisan view:clear || true
 
 php artisan migrate --force || true
 
+php artisan optimize:clear || true
 php artisan view:cache || true
 
 php -S 0.0.0.0:$PORT -t public
