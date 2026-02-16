@@ -1,18 +1,28 @@
 #!/usr/bin/env bash
 set -e
 
-php -v
+# Ensure storage dirs exist (IMPORTANT for view:cache)
+mkdir -p storage/framework/views
+mkdir -p storage/framework/cache
+mkdir -p storage/framework/sessions
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
 
-# Permissions (Railway container)
+# Optional permissions (Railway obicno radi i bez, ali nek stoji)
 chmod -R 775 storage bootstrap/cache || true
 
-# Laravel caches (safe in prod; if fails, do not crash)
-php artisan config:cache || true
-php artisan route:cache || true
-php artisan view:cache || true
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
 
-# Run migrations on boot (optional; remove if you don't want auto migrate)
-php artisan migrate --force || true
+# If APP_KEY is missing, generate (Railway obicno imas u Variables)
+php artisan key:generate --force || true
 
-# Serve
-php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# Cache after folders exist
+php artisan view:cache
+
+# Migracije (ako koristis DB)
+php artisan migrate --force
+
+# Start server (ako koristis php -S; ako koristis nginx, drugačije)
+php -S 0.0.0.0:${PORT:-8000} -t public
