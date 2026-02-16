@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\Controller;
 
 class CountryController extends Controller
 {
     public function index()
     {
-        $countries = Country::orderBy('name')->get();
-        return view('countries.index', compact('countries'));
+        $countries = Country::orderBy('name')->paginate(20)->withQueryString();
+        return view('admin.countries.index', compact('countries'));
     }
 
     public function create()
     {
-        return view('countries.create');
+        return view('admin.countries.create');
     }
 
     public function store(Request $request)
     {
-        // ✅ normalize BEFORE validate (case-insensitive uniqueness)
+        // normalize (case-insensitive unique)
         $request->merge([
             'name' => $this->normalizeName($request->input('name')),
             'code' => $this->normalizeCode($request->input('code')),
@@ -35,19 +35,16 @@ class CountryController extends Controller
 
         Country::create($data);
 
-        return redirect()
-            ->route('countries.index')
-            ->with('success', 'Country created successfully.');
+        return redirect()->route('admin.countries.index')->with('success', 'Country created.');
     }
 
     public function edit(Country $country)
     {
-        return view('countries.edit', compact('country'));
+        return view('admin.countries.edit', compact('country'));
     }
 
     public function update(Request $request, Country $country)
     {
-        // ✅ normalize BEFORE validate (case-insensitive uniqueness)
         $request->merge([
             'name' => $this->normalizeName($request->input('name')),
             'code' => $this->normalizeCode($request->input('code')),
@@ -60,30 +57,21 @@ class CountryController extends Controller
 
         $country->update($data);
 
-        return redirect()
-            ->route('countries.index')
-            ->with('success', 'Country updated successfully.');
+        return redirect()->route('admin.countries.index')->with('success', 'Country updated.');
     }
 
     public function destroy(Country $country)
     {
         $country->delete();
-
-        return redirect()
-            ->route('countries.index')
-            ->with('success', 'Country deleted successfully.');
+        return redirect()->route('admin.countries.index')->with('success', 'Country deleted.');
     }
 
     private function normalizeName(?string $name): ?string
     {
         if ($name === null)
             return null;
-
-        // trim + collapse spaces + lowercase
         $name = trim($name);
         $name = preg_replace('/\s+/', ' ', $name);
-
-        // mb_strtolower to be safe with non-ascii
         return mb_strtolower($name, 'UTF-8');
     }
 
@@ -91,11 +79,7 @@ class CountryController extends Controller
     {
         if ($code === null)
             return null;
-
-        // trim + lowercase; always store as lowercase in DB
         $code = trim($code);
-        $code = mb_strtolower($code, 'UTF-8');
-
-        return $code;
+        return mb_strtolower($code, 'UTF-8'); // store as lowercase
     }
 }
