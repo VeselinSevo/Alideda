@@ -43,7 +43,7 @@
                                     @php
                                         $p = $item->product;
                                         $thumb = $p?->primaryImage
-                                            ? asset('storage/' . $p->primaryImage->path)
+                                            ? ($p->primaryImage?->path ?? asset('images/no-image.jpg'))
                                             : asset('images/no-image.jpg');
 
                                         $lineTotal = (float) $p->price * (int) $item->quantity;

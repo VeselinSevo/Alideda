@@ -98,7 +98,7 @@
                     @foreach($products as $product)
                         @php
                             $primary = $product->primaryImage;
-                            $mainUrl = $primary ? asset('storage/' . $primary->path) : asset('images/no-image.jpg');
+                            $mainUrl = $primary?->path ?? asset('images/no-image.jpg');
 
                             // if you load images in controller later, you can show more thumbs.
                             // for now we’ll just use primary (and it still works).

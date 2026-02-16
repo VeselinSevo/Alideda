@@ -29,7 +29,7 @@
             && auth()->user()->stores()->whereKey($product->store_id)->exists();
 
         $primary = $product->images->firstWhere('is_primary', true) ?? $product->images->first();
-        $mainUrl = $primary ? asset('storage/' . $primary->path) : asset('images/no-image.jpg');
+        $mainUrl = $primary?->path ?? asset('images/no-image.jpg');
     @endphp
 
     <div class="py-8 bg-background">
@@ -62,7 +62,7 @@
                                 @foreach($orderedImages as $img)
 
                                     @php
-                                        $thumbUrl = asset('storage/' . $img->path);
+                                        $thumbUrl = $img->path ?? asset('images/no-image.jpg');
                                     @endphp
 
                                     <button type="button" data-image="{{ $thumbUrl }}"

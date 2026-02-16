@@ -128,7 +128,7 @@
                                                                                                             {{ $img->is_primary
                                 ? 'border-accent ring-2 ring-accent'
                                 : 'border-border hover:border-secondary' }}">
-                                                <img src="{{ asset('storage/' . $img->path) }}" class="w-28 h-28 object-cover"
+                                                <img src="{{ $img->path ?? asset('images/no-image.jpg') }}" class="w-28 h-28 object-cover"
                                                     alt="img">
                                             </button>
                                         </form>

@@ -141,7 +141,7 @@
                                     @php
                                         $product = $item->product;
                                         $img = $product->primaryImage
-                                            ? asset('storage/' . $product->primaryImage->path)
+                                            ? ($product->primaryImage?->path ?? asset('images/no-image.jpg'))
                                             : asset('images/no-image.jpg');
                                     @endphp
 

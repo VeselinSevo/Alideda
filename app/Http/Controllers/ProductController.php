@@ -1,24 +1,21 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Product;
 use App\Models\ProductImage;
-
 use App\Models\Store;
 use App\Models\Country;
 use App\Queries\ProductsQuery;
-
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
-
-
     public function index(Request $request)
     {
         $base = Product::query()
-            ->with(['store.country', 'primaryImage']); // you already have primaryImage
+            ->with(['store.country', 'primaryImage']);
 
         $products = ProductsQuery::for($base)
             ->apply($request)
@@ -31,19 +28,32 @@ class ProductController extends Controller
         return view('products.index', compact('products', 'stores', 'countries'));
     }
 
+    public function create(Request $request)
+    {
+        $stores = auth()->user()->stores()->orderBy('name')->get();
+
+        $selectedStoreId = $request->query('store_id');
+        if ($selectedStoreId && !$stores->where('id', $selectedStoreId)->count()) {
+            abort(403);
+        }
+
+        return view('products.create', compact('stores', 'selectedStoreId'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:0',
             'store_id' => 'required|integer',
+
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
             'primary_index' => 'nullable|integer|min:0',
         ]);
 
-        // must own store (you already have this)
+        // Must own store
         if (!auth()->user()->stores()->whereKey($data['store_id'])->exists()) {
             abort(403);
         }
@@ -57,30 +67,44 @@ class ProductController extends Controller
 
         $files = $request->file('images', []);
         $primaryIndex = (int) ($data['primary_index'] ?? 0);
+        var_dump($files);
 
         foreach ($files as $i => $file) {
-            $path = $file->store('products', 'public'); // storage/app/public/products/...
+            $upload = Cloudinary::upload($file->getRealPath(), [
+                'folder' => 'alideda/products',
+            ]);
+
+            $url = $upload->getSecurePath(); // full https url
 
             ProductImage::create([
                 'product_id' => $product->id,
-                'path' => $path,
+                'path' => $url,                 // store URL now
                 'is_primary' => ($i === $primaryIndex),
             ]);
         }
 
-        // if they uploaded images but primary index was out of range, make first primary
+        // If they uploaded images but none is primary (edge case), set first as primary
         if (count($files) > 0 && !$product->images()->where('is_primary', true)->exists()) {
             $product->images()->orderBy('id')->first()?->update(['is_primary' => true]);
         }
 
-        return redirect()->route('products.show', $product)->with('success', 'Product created successfully.');
+        return redirect()
+            ->route('products.show', $product)
+            ->with('success', 'Product created successfully.');
     }
-
 
     public function show(Product $product)
     {
         $product->load(['store', 'images']);
         return view('products.show', compact('product'));
+    }
+
+    public function edit(Product $product)
+    {
+        $product->load(['images', 'store']);
+        $stores = auth()->user()->stores()->orderBy('name')->get();
+
+        return view('products.edit', compact('product', 'stores'));
     }
 
     public function update(Request $request, Product $product)
@@ -98,55 +122,15 @@ class ProductController extends Controller
             ->with('success', 'Product updated!');
     }
 
-    public function edit(Product $product)
-    {
-        // $breadcrumbs = [
-        //     [
-        //         'label' => 'Products',
-        //         'url' => route('products.index'),
-        //     ],
-        //     [
-        //         'label' => $product->name, // or $product->id
-        //         'url' => route('products.show', $product),
-        //     ],
-        //     [
-        //         'label' => 'Edit',
-        //         'url' => '',
-        //     ],
-        // ];
-        $product->load(['images', 'store']);
-        $stores = auth()->user()->stores()->orderBy('name')->get(); // if you also allow changing store
-        return view('products.edit', compact('product', 'stores'));
-    }
-
     public function destroy(Product $product)
     {
+        // You can optionally delete Cloudinary assets if you store public_id.
+        // For now, keep it simple: delete DB images and product.
+        $product->images()->delete();
         $product->delete();
 
         return redirect()
             ->route('products.index')
             ->with('success', 'Product deleted!');
     }
-
-
-    public function create(Request $request)
-    {
-        $stores = auth()->user()->stores()->orderBy('name')->get();
-
-        // Optional preselected store from query (?store_id=)
-        $selectedStoreId = $request->query('store_id');
-
-        // SECURITY: only allow preselect if user owns that store
-        if ($selectedStoreId && !$stores->where('id', $selectedStoreId)->count()) {
-            abort(403);
-        }
-
-        return view('products.create', compact('stores', 'selectedStoreId'));
-    }
-
 }
-
-// create ce vratiti formu frontu koja ce da sadrzi inpute koji kada se popune i submituju onda ce se gadjati endpoint koji ce zvati store i store ce upisati u bazu
-
-
-

@@ -39,7 +39,7 @@
                                 @php
                                     $product = $item->product;
                                     $thumb = $product?->primaryImage
-                                        ? asset('storage/' . $product->primaryImage->path)
+                                        ? ($product->primaryImage?->path ?? asset('images/no-image.jpg'))
                                         : asset('images/no-image.jpg');
                                 @endphp
 
