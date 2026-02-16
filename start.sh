@@ -8,7 +8,11 @@ php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
+# MIGRATIONS
 php artisan migrate --force || true
+
+# SEEDERS (admin)
+php artisan db:seed --force || true
 
 php artisan optimize:clear || true
 php artisan view:cache || true
