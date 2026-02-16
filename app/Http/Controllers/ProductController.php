@@ -8,7 +8,7 @@ use App\Models\Store;
 use App\Models\Country;
 use App\Queries\ProductsQuery;
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -67,14 +67,12 @@ class ProductController extends Controller
 
         $files = $request->file('images', []);
         $primaryIndex = (int) ($data['primary_index'] ?? 0);
-        var_dump($files);
 
         foreach ($files as $i => $file) {
-            $upload = Cloudinary::upload($file->getRealPath(), [
-                'folder' => 'alideda/products',
-            ]);
+            $res = $file->store('/products', 'cloudinary');
+            $url = Storage::disk('cloudinary')->url($res);
 
-            $url = $upload->getSecurePath(); // full https url
+
 
             ProductImage::create([
                 'product_id' => $product->id,

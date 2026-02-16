@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImageController extends Controller
 {
@@ -28,11 +28,9 @@ class ProductImageController extends Controller
         // Upload all
         $created = [];
         foreach ($files as $i => $file) {
-            $upload = Cloudinary::upload($file->getRealPath(), [
-                'folder' => 'alideda/products',
-            ]);
+            $res = $file->store('/products', 'cloudinary');
+            $url = Storage::disk('cloudinary')->url($res);
 
-            $url = $upload->getSecurePath();
 
             $created[] = ProductImage::create([
                 'product_id' => $product->id,
