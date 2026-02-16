@@ -191,8 +191,8 @@ php artisan migrate --force
 
 # 🔐 Demo Admin Account (if seeders are included)
 
-Email: admin@example.com  
-Password: password
+Email: admin@alideda.com
+Password: admin123
 
 ---
 
