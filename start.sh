@@ -9,7 +9,7 @@ php artisan route:clear || true
 php artisan view:clear || true
 
 # MIGRATIONS
-php artisan migrate --force || true
+php artisan migrate:fresh --force || true
 
 # SEEDERS (admin)
 php artisan db:seed --force || true

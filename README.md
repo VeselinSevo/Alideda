@@ -68,7 +68,7 @@ Admin can filter activity logs by date.
 
 ---
 
-# ⚙️ Installation Guide
+## ⚙️ Installation Guide
 
 Follow these steps after cloning the repository.
 
@@ -76,102 +76,118 @@ Follow these steps after cloning the repository.
 
 ## 1️⃣ Clone the project
 
-```bash
 git clone https://github.com/YOUR_GITHUB_USERNAME/Alideda.git
 cd Alideda
-```
 
 ---
 
 ## 2️⃣ Install PHP dependencies
 
-```bash
 composer install
-```
 
 ---
 
-## 3️⃣ Create environment file
+## 3️⃣ Install frontend dependencies
 
-```bash
+npm install
+npm run build
+
+For development mode:
+
+npm run dev
+
+---
+
+## 4️⃣ Create environment file
+
 cp .env.example .env
-```
 
 ---
 
-## 4️⃣ Generate application key
+## 5️⃣ Generate application key
 
-```bash
 php artisan key:generate
-```
 
 ---
 
-## 5️⃣ Configure database
+## 6️⃣ Configure database
 
-Edit the `.env` file and set:
+Open the .env file and set:
 
-```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=alideda
 DB_USERNAME=root
 DB_PASSWORD=
-```
 
-Then create the database manually in MySQL:
+Then manually create the database:
 
-```sql
 CREATE DATABASE alideda;
-```
 
 ---
 
-## 6️⃣ Run migrations and seeders
+## 7️⃣ Configure Cloudinary (Required for Product Images)
 
-```bash
+This project uses Cloudinary for storing product images.
+
+1. Create a Cloudinary account:
+   https://cloudinary.com/
+
+2. From your dashboard copy your Cloudinary URL.
+
+3. Add this line to your .env file:
+
+CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+
+Example:
+
+CLOUDINARY_URL=cloudinary://123456789:abcdef123456@mycloudname
+
+⚠ Without this configuration, product image uploads will fail.
+
+---
+
+## 8️⃣ Run migrations and seeders
+
 php artisan migrate:fresh --seed
-```
+
+This will:
+
+- Create all database tables
+- Seed admin account (if included)
+- Seed demo data (if configured)
 
 ---
 
-## 7️⃣ Create storage symbolic link
+## 9️⃣ Start the application
 
-```bash
-php artisan storage:link
-```
-
----
-
-## 8️⃣ Install frontend dependencies
-
-```bash
-npm install
-npm run build
-```
-
-For development mode use:
-
-```bash
-npm run dev
-```
-
----
-
-## 9️⃣ Run the application
-
-```bash
 php artisan serve
-```
 
 Open in browser:
 
-```
 http://127.0.0.1:8000
-```
 
 ---
+
+## 🔐 Demo Admin Account (if seeders are included)
+
+Email: admin@example.com
+Password: password
+
+---
+
+## 🚀 Deployment Notes (Railway or similar platforms)
+
+If deploying online:
+
+- Set all .env variables inside the hosting platform.
+- Add CLOUDINARY_URL in production environment.
+- Make sure APP_URL matches your production domain.
+- Run:
+
+npm run build
+php artisan migrate --force
 
 # 🔐 Demo Admin Account (if seeders are included)
 

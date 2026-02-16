@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Country;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CountryController extends Controller
 {
     public function index()
     {
-        $countries = Country::all();
+        $countries = Country::orderBy('name')->get();
         return view('countries.index', compact('countries'));
     }
 
@@ -21,15 +21,15 @@ class CountryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:countries,code',
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('countries', 'name')],
+            'code' => ['required', 'string', 'size:2', Rule::unique('countries', 'code')],
         ]);
 
-        Country::create([
-            'name' => $request->name,
-            'code' => $request->code,
-        ]);
+        // optional: normalize
+        $data['code'] = strtoupper($data['code']);
+
+        Country::create($data);
 
         return redirect()->route('countries.index')->with('success', 'Country created successfully.');
     }
@@ -41,15 +41,14 @@ class CountryController extends Controller
 
     public function update(Request $request, Country $country)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:countries,code,',
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('countries', 'name')->ignore($country->id)],
+            'code' => ['required', 'string', 'size:2', Rule::unique('countries', 'code')->ignore($country->id)],
         ]);
 
-        $country->update([
-            'name' => $request->name,
-            'code' => $request->code,
-        ]);
+        $data['code'] = strtoupper($data['code']);
+
+        $country->update($data);
 
         return redirect()->route('countries.index')->with('success', 'Country updated successfully.');
     }

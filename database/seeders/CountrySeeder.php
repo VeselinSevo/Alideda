@@ -13,7 +13,19 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
-        // laravel kad pozovemo Country model i staticku metodu factory, on ce automatski da zna da treba da koristi CountryFactory klasu(ptrazice je u factory folderu- ime vazno da se podudara konvenciski)
-        Country::factory()->count(10)->create();
+        // Po zelji moze i factory, ali posto je samo 2-3 zemlje, ovo je ok
+        $countries = [
+            ['code' => 'RS', 'name' => 'Serbia'],
+            ['code' => 'ME', 'name' => 'Montenegro'],
+            ['code' => 'HR', 'name' => 'Croatia'],
+            // ...
+        ];
+
+        foreach ($countries as $c) {
+            Country::updateOrCreate(
+                ['code' => $c['code']],
+                ['name' => $c['name']]
+            );
+        }
     }
 }
