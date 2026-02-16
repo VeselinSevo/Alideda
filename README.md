@@ -2,7 +2,7 @@
 
 ---
 
-## ⚙️ Installation Guide --> LINE 63 -- IMPORTANT --
+## ⚙️ Installation Guide --> LINE 71 -- IMPORTANT --
 
 Alideda is a Laravel-based multi-store e-commerce platform developed as a university project.
 
